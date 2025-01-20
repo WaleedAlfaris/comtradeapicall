@@ -46,6 +46,7 @@ def getPreviewData(subscription_key, tradeDataType, typeCode, freqCode, clCode, 
             resp = http.request("GET", baseURL, fields=fields, timeout=120)
             if resp.status != 200:
                 print(resp.data.decode('utf-8'))
+                return {'status_code': resp.status, 'response': resp}
             else:
                 jsonResult = json.loads(resp.data)
                 if countOnly:
@@ -54,9 +55,10 @@ def getPreviewData(subscription_key, tradeDataType, typeCode, freqCode, clCode, 
                 else:
                     # Results contain the required data
                     df = json_normalize(jsonResult['data'])
-                return df
+                return {'status_code': resp.status, 'response': resp, 'data': df}
         except urllib3.exceptions.RequestError as err:
             print(f'Request error: {err}')
+            return {'status_code': 500, 'err': err, 'response': None}
 
 
 def previewFinalData(typeCode, freqCode, clCode, period, reporterCode, cmdCode, flowCode,
